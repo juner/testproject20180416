@@ -12,9 +12,10 @@ namespace CredReadExample
             try
             {
                 var i = 0;
-                if(CredEnumerate(null, 0, out var count,out Credentials))
+                var intPtrSize = Marshal.SizeOf<IntPtr>();
+                if (CredEnumerate(null, 0, out var count,out Credentials))
                     foreach(var c in Enumerable.Range(0, count)
-                     .Select(n => Marshal.ReadIntPtr(Credentials, n * Marshal.SizeOf(typeof(IntPtr))))
+                     .Select(n => Marshal.ReadIntPtr(Credentials, n * intPtrSize))
                      .Select(ptr => Marshal.PtrToStructure<CREDENTIAL>(ptr)))
                     {
                         Console.WriteLine($"{++i}");
@@ -33,29 +34,10 @@ namespace CredReadExample
                         var ai = 0;
                         var aSize = Marshal.SizeOf<CREDENTIAL_ATTRIBUTE>();
                         foreach (var attribute in Enumerable.Range(0, (int)c.AttributeCount)
-                                        .Select(x => Marshal.ReadIntPtr(c.Attributes, x * aSize))
-                                        .Select(x =>
-                                        {
-                                            var pos = 0;
-                                            var Keyword = Marshal.PtrToStringUni(x);
-                                            pos += Marshal.SizeOf<IntPtr>();
-                                            var Flags = (uint)Marshal.ReadInt32(x, pos);
-                                            pos += sizeof(uint);
-                                            var ValueSize = (uint)Marshal.ReadInt32(x, pos);
-                                            pos += sizeof(uint);
-                                            var Value = Marshal.SizeOf<IntPtr>() == 4 ? new IntPtr(x.ToInt32() * pos)
-                                                : Marshal.SizeOf<IntPtr>() == 8 ? new IntPtr(x.ToInt64() * pos)
-                                                : new IntPtr(x.ToInt32() * pos);
-                                            pos += Marshal.SizeOf<IntPtr>();
-                                            return new CREDENTIAL_ATTRIBUTE
-                                            {
-                                                Keyword = Keyword,
-                                                Flags = Flags,
-                                                ValueSize = ValueSize,
-                                                Value = Value,
-                                            };
-                                        })
-                                        )
+                                        .Select(x => intPtrSize == 4 ? new IntPtr(c.Attributes.ToInt32()+ x * aSize)
+                                                : intPtrSize == 8 ? new IntPtr(c.Attributes.ToInt64() + x * aSize)
+                                                : new IntPtr(c.Attributes.ToInt32() + x * aSize))
+                                        .Select(x => Marshal.PtrToStructure<CREDENTIAL_ATTRIBUTE>(x)))
                         {
                             Console.WriteLine($"{nameof(c.Attributes)} - {++ai}");
                             Console.WriteLine($"{nameof(attribute.Keyword)}:{attribute.Keyword}");
@@ -64,6 +46,7 @@ namespace CredReadExample
                             var _AttributeValue = new byte[attribute.ValueSize];
                             if (attribute.ValueSize > 0)
                                 Marshal.Copy(attribute.Value, _AttributeValue, 0, (int)attribute.ValueSize);
+
                             Console.WriteLine($"{nameof(attribute.Value)}:[{string.Join(" ", _AttributeValue.Select(v => $"{v:X2}"))}]");
                         }
                         Console.WriteLine($"{nameof(c.TargetAlias)}:{c.TargetAlias}");
