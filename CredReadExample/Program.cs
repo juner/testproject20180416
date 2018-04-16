@@ -31,9 +31,31 @@ namespace CredReadExample
                         Console.WriteLine($"{nameof(c.Persist)}:{c.Persist}");
                         Console.WriteLine($"{nameof(c.AttributeCount)}:{c.AttributeCount}");
                         var ai = 0;
-                        foreach(var attribute in Enumerable.Range(0, (int)c.AttributeCount)
-                                        .Select(x => Marshal.ReadIntPtr(c.Attributes, x * Marshal.SizeOf<CREDENTIAL_ATTRIBUTE>()))
-                                        .Select(x => Marshal.PtrToStructure<CREDENTIAL_ATTRIBUTE>(x)))
+                        var aSize = Marshal.SizeOf<CREDENTIAL_ATTRIBUTE>();
+                        foreach (var attribute in Enumerable.Range(0, (int)c.AttributeCount)
+                                        .Select(x => Marshal.ReadIntPtr(c.Attributes, x * aSize))
+                                        .Select(x =>
+                                        {
+                                            var pos = 0;
+                                            var Keyword = Marshal.PtrToStringUni(x);
+                                            pos += Marshal.SizeOf<IntPtr>();
+                                            var Flags = (uint)Marshal.ReadInt32(x, pos);
+                                            pos += sizeof(uint);
+                                            var ValueSize = (uint)Marshal.ReadInt32(x, pos);
+                                            pos += sizeof(uint);
+                                            var Value = Marshal.SizeOf<IntPtr>() == 4 ? new IntPtr(x.ToInt32() * pos)
+                                                : Marshal.SizeOf<IntPtr>() == 8 ? new IntPtr(x.ToInt64() * pos)
+                                                : new IntPtr(x.ToInt32() * pos);
+                                            pos += Marshal.SizeOf<IntPtr>();
+                                            return new CREDENTIAL_ATTRIBUTE
+                                            {
+                                                Keyword = Keyword,
+                                                Flags = Flags,
+                                                ValueSize = ValueSize,
+                                                Value = Value,
+                                            };
+                                        })
+                                        )
                         {
                             Console.WriteLine($"{nameof(c.Attributes)} - {++ai}");
                             Console.WriteLine($"{nameof(attribute.Keyword)}:{attribute.Keyword}");
@@ -100,9 +122,10 @@ namespace CredReadExample
             USERNAME_TARGET = 0x4
         }
 
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct CREDENTIAL_ATTRIBUTE
         {
+            [MarshalAs(UnmanagedType.LPWStr)]
             public string Keyword;
             public uint Flags;
             public uint ValueSize;
