@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2037
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CredReadExample", "CredReadExample\CredReadExample.csproj", "{A1CFF4F3-3E75-437F-98B1-C75AA8672FD3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1CFF4F3-3E75-437F-98B1-C75AA8672FD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1CFF4F3-3E75-437F-98B1-C75AA8672FD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1CFF4F3-3E75-437F-98B1-C75AA8672FD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1CFF4F3-3E75-437F-98B1-C75AA8672FD3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B2FE0011-D94F-466F-A1BB-8639D3F015F1}
+	EndGlobalSection
+EndGlobal
