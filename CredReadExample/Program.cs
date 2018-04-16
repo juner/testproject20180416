@@ -34,9 +34,7 @@ namespace CredReadExample
                         var ai = 0;
                         var aSize = Marshal.SizeOf<CREDENTIAL_ATTRIBUTE>();
                         foreach (var attribute in Enumerable.Range(0, (int)c.AttributeCount)
-                                        .Select(x => intPtrSize == 4 ? new IntPtr(c.Attributes.ToInt32()+ x * aSize)
-                                                : intPtrSize == 8 ? new IntPtr(c.Attributes.ToInt64() + x * aSize)
-                                                : new IntPtr(c.Attributes.ToInt32() + x * aSize))
+                                        .Select(x => IntPtr.Add(c.Attributes,x * aSize))
                                         .Select(x => Marshal.PtrToStructure<CREDENTIAL_ATTRIBUTE>(x)))
                         {
                             Console.WriteLine($"{nameof(c.Attributes)} - {++ai}");
